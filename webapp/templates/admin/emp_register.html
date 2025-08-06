@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Increment Email Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(120deg, #ff9a9e, #fad0c4);
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        input {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            padding: 10px;
+            background: #ff9a9e;
+            border-radius: 5px;
+            border: none;
+            text-align: center;
+            transition: all 0.5s ease-in-out;
+            outline: none;
+            cursor: pointer;
+        }
+        input:focus {
+            background: #ff758c;
+            transform: scale(1.1);
+        }
+
+        input[type="file"] {
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #ff758c;
+            color: white;
+        }
+        input[type="file"]:hover {
+            background: #ff5e78;
+        }
+      
+        .preview {
+            margin-top: 15px;
+            width: 50px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <form class="container" action="" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <h2>Employee Register</h2>
+        <input type="text" name="name"  placeholder="Name" ><br><br>
+        <input type="number" name="phone"  placeholder="Phone No." ><br><br>
+        <input type="number" name="age"  placeholder="Age" ><br><br>
+        <input type="hidden" name="pass"  placeholder="Name"  value="{{pass}}">
+        <input type="text" name="email" placeholder="Click The Email Field" id="emailBox" readonly onclick="generateEmail()"><br><br>
+        <input type="file" name="pic" id="fileInput" accept="image/*" onchange="previewImage(event)">
+        <br>
+        <img id="imagePreview" class="preview"><br><br>
+        <input type="submit" value="Submit">
+
+
+        
+    </form>
+    
+    <script>
+        let currentEmail = "{{email}}";
+        let emailBox = document.getElementById("emailBox");
+         // Set initial value
+
+        function generateEmail() {
+            let match = currentEmail.match(/(\d+)/);
+            if (match) {
+                let number = parseInt(match[0]);
+                let nextNumber = String(number + 1).padStart(2, '0');
+                currentEmail = `ss_${nextNumber}@gmail.com`;
+                emailBox.value = currentEmail;
+                emailBox.style.transform = "scale(1.2)";
+                emailBox.style.opacity = "0";
+                setTimeout(() => {
+                    emailBox.style.transform = "scale(1)";
+                    emailBox.style.opacity = "1";
+                }, 500);
+            }
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const image = document.getElementById("imagePreview");
+                image.src = reader.result;
+                image.style.display = "block";
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Email Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+        }
+
+        .email-container {
+            width: 450px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            color: #2a5298;
+            margin-bottom: 15px;
+        }
+
+        .input-wrapper {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+            color: #2a5298;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 2px solid #2a5298;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #ff4b2b;
+            box-shadow: 0 0 10px rgba(255, 75, 43, 0.3);
+        }
+
+        .email-tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px;
+            border: 2px solid #2a5298;
+            border-radius: 6px;
+            min-height: 50px;
+            cursor: text;
+        }
+
+        .email-tag {
+            display: flex;
+            align-items: center;
+            background: #2a5298;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            animation: bounceIn 0.3s ease-in-out;
+        }
+
+        @keyframes bounceIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .email-tag span {
+            margin-left: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .email-tag span:hover {
+            color: #ff4b2b;
+        }
+
+        .file-upload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+            border: 2px dashed #2a5298;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(42, 82, 152, 0.1);
+        }
+
+        .file-upload:hover {
+            background: rgba(42, 82, 152, 0.2);
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #1e3c72;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <form class="email-container" action="" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <h2>Compose Email</h2>
+
+        <div class="input-wrapper">
+            <label>From</label>
+            <input type="email" required name="email_f" value="{{profile.user.username}}" id="fromEmail" placeholder="your-email@example.com">
+        </div>
+
+        <div class="input-wrapper">
+            <label>To</label>
+            <div class="email-tag-container" id="toEmails" onclick="focusInput('toEmail')">
+                <input type="text" required name="email_t" id="toEmail" placeholder="Enter recipient emails">
+            </div>
+        </div>
+
+        <div class="input-wrapper">
+            <label>CC</label>
+            <div class="email-tag-container" id="ccEmails" onclick="focusInput('ccEmail')">
+                <input type="text"  name="email_c" id="ccEmail" placeholder="Enter CC emails">
+            </div>
+        </div>
+
+        <div class="input-wrapper">
+            <label>Subject</label>
+            <input type="text" required name="subject" id="subject" placeholder="Enter subject">
+        </div>
+
+        <div class="input-wrapper">
+            <label>Body</label>
+            <textarea id="body" name="body" required rows="4" placeholder="Write your message..."></textarea>
+        </div>
+
+        <div class="input-wrapper">
+            <label>Attachment</label>
+            <input type="file" name="file" accept="application/pdf" required class="file-upload" id="fileUpload">
+        </div>
+
+        <div class="input-wrapper">
+            <label>File Password</label>
+            <input type="text" name="password" placeholder="Click The File" required readonly  onclick="generatePassword()"  id="passwordField">
+        </div>
+<input type="hidden" value="{{ profile.phone_number }}" name="phone">
+        <button class="submit-btn" >Send Email</button>
+
+        <div class="error" id="errorMsg"></div>
+    </form>
+
+    <script>
+        function focusInput(id) {
+            document.getElementById(id).focus();
+        }
+
+        function validateEmail(email) {
+            const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return re.test(email);
+        }
+
+        
+        function generatePassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*!";
+            let password = "";
+            for (let i = 0; i < 8; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById("passwordField").value = password;
+        }
+    
+        
+    </script>
+
+</body>
+</html>

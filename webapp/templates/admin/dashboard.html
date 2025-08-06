@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Profile Section */
+        .profile-container {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin-top: 10px;
+        }
+
+        /* Card Grid */
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 15px;
+            width: 250px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .read-btn {
+            background: #28a745;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .card {
+            transition: transform 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+            cursor: pointer;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modal Animation */
+        .modal-content {
+            animation: fadeInUp 0.5s ease-in-out;
+            border-radius: 10px;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Input Animation */
+        .form-control {
+            transition: all 0.3s ease-in-out;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+            border-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- User Profile Section -->
+    <div class="profile-container">
+        <h2>Welcome, {{ profile.user.first_name }}</h2>
+        <img src="{{ profile.profile_picture.url }}" alt="Profile Pic" class="profile-pic">
+        <p>{{ user.email }}</p>
+        <a href="{% url 'emp_logout' %}" class="btn logout-btn">Logout</a>
+        <a href="{% url 'email_form' %}" class="btn logout-btn">Email</a>
+    </div>
+
+    <!-- Card Section -->
+    <div class="card-container">
+        {% for post in card %}
+            <div class="card">
+                <h4>{{post.user.username}}</h4>
+                <p>{{post.subject}}</p>
+                <div class="buttons">
+                    <button class="btn read-btn" onclick="openLoginModal{{post.id}}()">Read</button>
+                    
+                </div>
+            </div>
+
+            <!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enter Credentials</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Enter Username">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Enter Password">
+                </div>
+                <div id="error-msg" class="text-danger text-center"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="validateLogin{{post.id}}()">Login</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openLoginModal{{post.id}}() {
+        let loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    }
+
+    function validateLogin{{post.id}}() {
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+
+        if ((username === "{{post.t_email}}") && password === "{{post.password}}") {
+            document.getElementById("error-msg").textContent = "";
+            let loginModalEl = document.getElementById('loginModal');
+            let loginModal = bootstrap.Modal.getInstance(loginModalEl);
+            loginModal.hide();
+
+            window.location.href = "{{post.pdfs.url}}";
+        } else {
+            document.getElementById("error-msg").textContent = "Invalid Credentials!";
+        }
+    }
+</script>
+        {%endfor%}
+    </div>
+
+</body>
+</html>
